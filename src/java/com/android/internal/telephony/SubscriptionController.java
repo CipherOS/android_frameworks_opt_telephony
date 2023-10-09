@@ -903,20 +903,20 @@ public class SubscriptionController extends ISub.Stub {
         List<SubscriptionInfo> subList;
         try {
             subList = getSubInfo(null, null);
+
+            if (subList != null) {
+                if (VDBG) logd("[getAllSubInfoList]- " + subList.size() + " infos return");
+                subList.stream().map(
+                        subscriptionInfo -> conditionallyRemoveIdentifiers(subscriptionInfo,
+                                callingPackage, callingFeatureId, "getAllSubInfoList"))
+                        .collect(Collectors.toList());
+            } else {
+                if (VDBG) logd("[getAllSubInfoList]- no info return");
+            }
+            return subList;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        if (subList != null && !skipConditionallyRemoveIdentifier) {
-            if (VDBG) logd("[getAllSubInfoList]- " + subList.size() + " infos return");
-            subList = subList.stream().map(
-                    subscriptionInfo -> conditionallyRemoveIdentifiers(subscriptionInfo,
-                            callingPackage, callingFeatureId, "getAllSubInfoList"))
-                    .collect(Collectors.toList());
-        } else {
-            if (VDBG) logd("[getAllSubInfoList]- no info return");
-        }
-        return subList;
-    }
 
     private List<SubscriptionInfo> makeCacheListCopyWithLock(List<SubscriptionInfo> cacheSubList) {
         synchronized (mSubInfoListLock) {
